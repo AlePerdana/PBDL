@@ -1,74 +1,110 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, searchTerm } from "react";
 import { motion } from "framer-motion";
 import SearchIcon from "../assets/search.png";
+import axios from "axios";
 
-const TaskConfig = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [taskName, setTaskName] = useState("");
+const TodoList = () => {
+  const [taskName, setTaskName] = useState('');
+  const [tasks, setTasks] = useState([]);
+  const [title, setTitle] = useState('');
+  const [status, setStatus] = useState('');
+  const [date, setDate] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [editId, setEditId] = useState(null);
-  const [status, setStatus] = useState("");
-  const [date, setDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
 
-  // Placeholder data with form-matching fields
-  const [tasks, setTasks] = useState([
-    {
-      task_id: 1,
-      task_name: "Task A",
-      status: "Active",
-      date: "2024-01-01",
-      start_time: "08:00",
-      end_time: "10:00",
-    },
-    {
-      task_id: 2,
-      task_name: "Task B",
-      status: "Inactive",
-      date: "2024-01-02",
-      start_time: "09:00",
-      end_time: "12:00",
-    },
-  ]);
-
-  const handleEdit = (task) => {
-    setEditId(task.task_id);
-    setTaskName(task.task_name);
-    setStatus(task.status);
-    setDate(task.date);
-    setStartTime(task.start_time);
-    setEndTime(task.end_time);
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/todos/');
+      console.log('Fetched Tasks:', response.data);
+      setTasks(response.data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
+  const handleAddTask = async (event) => {
+    event.preventDefault();
+    const newTask = {
+      title: title,
+      status: status,
+      date: date,
+      startTime: `${date} ${startTime}`,
+      endTime: `${date} ${endTime}`,
+    };
+  
+    if (new Date(newTask.startTime) >= new Date(newTask.endTime)) {
+      alert("Start time must be earlier than end time.");
+      return;
+    }
+  
+    try {
+      const response = await axios.post('http://localhost:3000/todos/', newTask);
+      console.log('Task added:', response.data);
+      fetchTasks();
+      setTitle('');
+      setStatus('');
+      setDate('');
+      setStartTime('');
+      setEndTime('');
+    } catch (error) {
+      console.error('Error adding task:', error);
+    }
   };
 
-  const handleSubmit = () => {
-    const newTask = {
-      task_id: editId || new Date().getTime(),
-      task_name: taskName,
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/todos/${id}`);
+      fetchTasks();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
+  };
+
+  const handleEdit = async (task) => {
+    console.log('Editing task with ID:', task._id);
+    setEditId(task._id);
+    setTitle(task.title);
+    setStatus(task.status);
+    setDate(task.date);
+    setStartTime(task.startTime);
+    setEndTime(task.endTime);
+  };
+
+  const handleUpdateTask = async (event) => {
+    event.preventDefault();
+    const updatedTask = {
+      title,
       status,
       date,
-      start_time: startTime,
-      end_time: endTime,
+      startTime,
+      endTime,
     };
 
-    if (editId) {
-      // Update existing task
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.task_id === editId ? newTask : task))
-      );
-    } else {
-      // Add new task
-      setTasks((prevTasks) => [...prevTasks, newTask]);
+    try {
+      const response = await axios.put(`http://localhost:3000/todos/${editId}`, updatedTask);
+      console.log('Task updated:', response.data);
+      fetchTasks();
+      setEditId(null);
+      setTitle('');
+      setStatus('');
+      setDate('');
+      setStartTime('');
+      setEndTime('');
+    } catch (error) {
+      console.error('Error updating task:', error);
     }
-    resetForm();
   };
 
   const resetForm = () => {
     setEditId(null);
-    setTaskName("");
-    setStatus("");
-    setDate("");
-    setStartTime("");
-    setEndTime("");
+    setTitle('');
+    setStatus('');
+    setDate('');
+    setStartTime('');
+    setEndTime('');
   };
 
   return (
@@ -129,9 +165,7 @@ const TaskConfig = () => {
             <tbody>
               {tasks
                 .filter((task) =>
-                  task.task_name
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase())
+                  task.task_name && task.task_name.toLowerCase().includes(searchTerm.toLowerCase())
                 )
                 .map((task, index) => (
                   <tr
@@ -199,8 +233,9 @@ const TaskConfig = () => {
               onChange={(e) => setStatus(e.target.value)}
             >
               <option value="">Select Status</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
+              <option value="pending">pending</option>
+              <option value="in-progress">in-progress</option>
+              <option value="done">done</option>
             </select>
 
             <label htmlFor="date" className="font-poppins text-black">
@@ -239,7 +274,7 @@ const TaskConfig = () => {
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={handleSubmit}
+                onClick={handleAddTask}
                 className="bg-blue-600 text-white px-4 py-2 mt-4 rounded-xl"
               >
                 {editId ? "Update" : "Submit"}
@@ -252,4 +287,4 @@ const TaskConfig = () => {
   );
 };
 
-export default TaskConfig;
+export default TodoList;
