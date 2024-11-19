@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import SearchIcon from "../assets/search.png";
 
-const PlotConfig = () => {
+const TaskConfig = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [plotName, setPlotName] = useState("");
-  const [area, setArea] = useState(""); // Optional, if needed later
+  const [taskName, setTaskName] = useState("");
   const [editId, setEditId] = useState(null);
   const [status, setStatus] = useState("");
   const [date, setDate] = useState("");
@@ -13,18 +12,18 @@ const PlotConfig = () => {
   const [endTime, setEndTime] = useState("");
 
   // Placeholder data with form-matching fields
-  const [plots, setPlots] = useState([
+  const [tasks, setTasks] = useState([
     {
-      plot_id: 1,
-      plot_name: "Task A",
+      task_id: 1,
+      task_name: "Task A",
       status: "Active",
       date: "2024-01-01",
       start_time: "08:00",
       end_time: "10:00",
     },
     {
-      plot_id: 2,
-      plot_name: "Task B",
+      task_id: 2,
+      task_name: "Task B",
       status: "Inactive",
       date: "2024-01-02",
       start_time: "09:00",
@@ -32,19 +31,19 @@ const PlotConfig = () => {
     },
   ]);
 
-  const handleEdit = (plot) => {
-    setEditId(plot.plot_id);
-    setPlotName(plot.plot_name);
-    setStatus(plot.status);
-    setDate(plot.date);
-    setStartTime(plot.start_time);
-    setEndTime(plot.end_time);
+  const handleEdit = (task) => {
+    setEditId(task.task_id);
+    setTaskName(task.task_name);
+    setStatus(task.status);
+    setDate(task.date);
+    setStartTime(task.start_time);
+    setEndTime(task.end_time);
   };
 
   const handleSubmit = () => {
-    const newPlot = {
-      plot_id: editId || new Date().getTime(),
-      plot_name: plotName,
+    const newTask = {
+      task_id: editId || new Date().getTime(),
+      task_name: taskName,
       status,
       date,
       start_time: startTime,
@@ -52,22 +51,20 @@ const PlotConfig = () => {
     };
 
     if (editId) {
-      // Update existing plot
-      setPlots((prevPlots) =>
-        prevPlots.map((plot) =>
-          plot.plot_id === editId ? newPlot : plot
-        )
+      // Update existing task
+      setTasks((prevTasks) =>
+        prevTasks.map((task) => (task.task_id === editId ? newTask : task))
       );
     } else {
-      // Add new plot
-      setPlots((prevPlots) => [...prevPlots, newPlot]);
+      // Add new task
+      setTasks((prevTasks) => [...prevTasks, newTask]);
     }
     resetForm();
   };
 
   const resetForm = () => {
     setEditId(null);
-    setPlotName("");
+    setTaskName("");
     setStatus("");
     setDate("");
     setStartTime("");
@@ -130,38 +127,38 @@ const PlotConfig = () => {
               </tr>
             </thead>
             <tbody>
-              {plots
-                .filter((plot) =>
-                  plot.plot_name
+              {tasks
+                .filter((task) =>
+                  task.task_name
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase())
                 )
-                .map((plot, index) => (
+                .map((task, index) => (
                   <tr
-                    key={plot.plot_id || index}
+                    key={task.task_id || index}
                     className="border-b border-black"
                   >
                     <td className="py-2 px-2 md:px-3 font-poppins">
                       {index + 1}
                     </td>
                     <td className="py-2 px-2 md:px-3 font-poppins">
-                      {plot.plot_name}
+                      {task.task_name}
                     </td>
                     <td className="py-2 px-2 md:px-3 font-poppins">
-                      {plot.status}
+                      {task.status}
                     </td>
                     <td className="py-2 px-2 md:px-3 font-poppins">
-                      {plot.date}
+                      {task.date}
                     </td>
                     <td className="py-2 px-2 md:px-3 font-poppins">
-                      {plot.start_time}
+                      {task.start_time}
                     </td>
                     <td className="py-2 px-2 md:px-3 font-poppins">
-                      {plot.end_time}
+                      {task.end_time}
                     </td>
                     <td className="py-2 px-2 md:px-3 font-poppins">
                       <button
-                        onClick={() => handleEdit(plot)}
+                        onClick={() => handleEdit(task)}
                         className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded-md mr-2"
                       >
                         Edit
@@ -181,15 +178,15 @@ const PlotConfig = () => {
             {editId ? "Edit Task" : "Add New Task"}
           </h2>
           <form className="flex flex-col gap-3">
-            <label htmlFor="plotName" className="font-poppins text-black">
+            <label htmlFor="taskName" className="font-poppins text-black">
               Task Title
             </label>
             <input
               type="text"
               placeholder="Task Title"
               className="p-2 rounded-xl bg-white text-black border border-gray-300"
-              value={plotName}
-              onChange={(e) => setPlotName(e.target.value)}
+              value={taskName}
+              onChange={(e) => setTaskName(e.target.value)}
             />
 
             <label htmlFor="status" className="font-poppins text-black">
@@ -255,4 +252,4 @@ const PlotConfig = () => {
   );
 };
 
-export default PlotConfig;
+export default TaskConfig;
