@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const todoRoutes = require("./routes/todoRoute");
 require("dotenv").config();
+const task = require("./models/task");
 
 const app = express();
 

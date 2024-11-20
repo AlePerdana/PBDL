@@ -4,7 +4,6 @@ import SearchIcon from "../assets/search.png";
 import axios from "axios";
 
 const TodoList = () => {
-  const [taskName, setTaskName] = useState('');
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState('');
@@ -31,8 +30,8 @@ const TodoList = () => {
       title: title,
       status: status,
       date: date,
-      startTime: `${date} ${startTime}`,
-      endTime: `${date} ${endTime}`,
+      startTime: startTime,
+      endTime: endTime,
     };
   
     if (new Date(newTask.startTime) >= new Date(newTask.endTime)) {
@@ -44,11 +43,6 @@ const TodoList = () => {
       const response = await axios.post('http://localhost:3000/todos/', newTask);
       console.log('Task added:', response.data);
       fetchTasks();
-      setTitle('');
-      setStatus('');
-      setDate('');
-      setStartTime('');
-      setEndTime('');
     } catch (error) {
       console.error('Error adding task:', error);
     }
@@ -87,24 +81,9 @@ const TodoList = () => {
       const response = await axios.put(`http://localhost:3000/todos/${editId}`, updatedTask);
       console.log('Task updated:', response.data);
       fetchTasks();
-      setEditId(null);
-      setTitle('');
-      setStatus('');
-      setDate('');
-      setStartTime('');
-      setEndTime('');
     } catch (error) {
       console.error('Error updating task:', error);
     }
-  };
-
-  const resetForm = () => {
-    setEditId(null);
-    setTitle('');
-    setStatus('');
-    setDate('');
-    setStartTime('');
-    setEndTime('');
   };
 
   return (
@@ -164,9 +143,6 @@ const TodoList = () => {
             </thead>
             <tbody>
               {tasks
-                .filter((task) =>
-                  task.task_name && task.task_name.toLowerCase().includes(searchTerm.toLowerCase())
-                )
                 .map((task, index) => (
                   <tr
                     key={task.task_id || index}
@@ -176,7 +152,7 @@ const TodoList = () => {
                       {index + 1}
                     </td>
                     <td className="py-2 px-2 md:px-3 font-poppins">
-                      {task.task_name}
+                      {task.title}
                     </td>
                     <td className="py-2 px-2 md:px-3 font-poppins">
                       {task.status}
@@ -185,10 +161,10 @@ const TodoList = () => {
                       {task.date}
                     </td>
                     <td className="py-2 px-2 md:px-3 font-poppins">
-                      {task.start_time}
+                      {task.startTime}
                     </td>
                     <td className="py-2 px-2 md:px-3 font-poppins">
-                      {task.end_time}
+                      {task.endTime}
                     </td>
                     <td className="py-2 px-2 md:px-3 font-poppins">
                       <button
@@ -197,7 +173,9 @@ const TodoList = () => {
                       >
                         Edit
                       </button>
-                      <button className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-md">
+                      <button 
+                        onClick={() => handleDelete(task._id)} 
+                        className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-md">
                         Done
                       </button>
                     </td>
@@ -212,15 +190,15 @@ const TodoList = () => {
             {editId ? "Edit Task" : "Add New Task"}
           </h2>
           <form className="flex flex-col gap-3">
-            <label htmlFor="taskName" className="font-poppins text-black">
+            <label htmlFor="title" className="font-poppins text-black">
               Task Title
             </label>
             <input
               type="text"
               placeholder="Task Title"
               className="p-2 rounded-xl bg-white text-black border border-gray-300"
-              value={taskName}
-              onChange={(e) => setTaskName(e.target.value)}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
 
             <label htmlFor="status" className="font-poppins text-black">
@@ -274,7 +252,7 @@ const TodoList = () => {
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={handleAddTask}
+                onClick= {editId ? handleUpdateTask : handleAddTask} 
                 className="bg-blue-600 text-white px-4 py-2 mt-4 rounded-xl"
               >
                 {editId ? "Update" : "Submit"}
